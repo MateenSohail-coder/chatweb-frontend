@@ -134,10 +134,6 @@ export function ProfileModal({ userId, onClose }: ProfileModalProps) {
 
               <div className="space-y-2 text-xs">
                 <div className="flex items-center gap-2 text-gray-300">
-                  <Mail className="w-3.5 h-3.5 text-gray-500" />
-                  <span>{profile.email}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-300">
                   <Calendar className="w-3.5 h-3.5 text-gray-500" />
                   <span>
                     Joined{" "}

@@ -84,15 +84,22 @@ export function MessageItem({
 
       {/* Content */}
       <div className={`min-w-0 flex-1 ${isOwn ? "text-right" : ""}`}>
-        <div className={`flex items-baseline gap-2 mb-0.5 ${isOwn ? "flex-row-reverse" : ""}`}>
+        <div
+          className={`flex items-baseline gap-2 mb-0.5 ${isOwn ? "flex-row-reverse" : ""}`}
+        >
           <button
             type="button"
             onClick={() => onAvatarClick(message.senderId)}
             className={`text-sm font-semibold hover:underline ${
-              vip ? "text-amber-400" : isOwn ? "text-indigo-400" : "text-gray-100"
+              vip
+                ? "text-amber-400"
+                : isOwn
+                  ? "text-indigo-400"
+                  : "text-gray-100"
             }`}
           >
-            {vip && !isOwn ? '★ ' : ''}{isOwn ? "You" : displayName}
+            {vip && !isOwn ? "★ " : ""}
+            {isOwn ? "You" : displayName}
           </button>
           <span className="text-[10px] text-gray-600 group-hover:text-gray-500 transition-colors">
             {time}
@@ -115,7 +122,9 @@ export function MessageItem({
         </p>
 
         {reactionKeys.length > 0 && (
-          <div className={`flex flex-wrap gap-1 mt-1 ${isOwn ? "flex-row-reverse" : ""}`}>
+          <div
+            className={`flex flex-wrap gap-1 mt-1 ${isOwn ? "flex-row-reverse" : ""}`}
+          >
             {reactionKeys.map((emoji) => (
               <motion.button
                 key={emoji}
