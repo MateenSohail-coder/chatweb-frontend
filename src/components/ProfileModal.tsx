@@ -50,7 +50,7 @@ export function ProfileModal({ userId, onClose }: ProfileModalProps) {
 
         <div className="relative px-4 pb-4">
           {profile?.avatar ? (
-            <div className="relative w-20 h-20 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10">
+            <div className="relative w-20 h-20 overflow-hidden rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10">
               <img
                 src={profile?.avatar}
                 alt="profile"
