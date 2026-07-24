@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: Ephemeral Chat Platform API & Socket Payload Contract
+  version: 1.0.0
+paths:
+  /api/auth/signup:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                email: { type: string }
+                password: { type: string }
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  token: { type: string }
+                  user: { type: object }
+
+  /api/auth/login:
+    post:
+      summary: Authenticate user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        200:
+          description: OK
+
+  /api/users/profile/{userId}:
+    get:
+      summary: Fetch user profile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        200:
+          description: OK
+
+socket_events:
+  client_to_server:
+    - name: "user_connected"
+      payload: { userId: string }
+    - name: "send_message"
+      payload: { id: string, senderId: string, recipientId: string, text: string, replyToId: string, timestamp: number }
+    - name: "typing_start"
+      payload: { senderId: string, recipientId: string }
+    - name: "typing_stop"
+      payload: { senderId: string, recipientId: string }
+    - name: "add_reaction"
+      payload: { messageId: string, emoji: string, senderId: string, recipientId: string }
+
+  server_to_client:
+    - name: "receive_message"
+      payload: { id: string, senderId: string, text: string, replyToId: string, timestamp: number }
+    - name: "presence_update"
+      payload: { userId: string, status: "online" | "offline" }
+    - name: "display_typing"
+      payload: { userId: string, isTyping: boolean }
+    - name: "reaction_updated"
+      payload: { messageId: string, emoji: string, userId: string }
+    - name: "system_announcement"
+      payload: { text: string, timestamp: number }
