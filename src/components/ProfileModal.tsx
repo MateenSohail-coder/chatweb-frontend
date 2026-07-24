@@ -49,9 +49,20 @@ export function ProfileModal({ userId, onClose }: ProfileModalProps) {
         <div className="h-15 bg-[#5865F2]" />
 
         <div className="relative px-4 pb-4">
-          <div className="w-20 h-20 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10">
-            {profile?.username?.charAt(0).toUpperCase() || (loading ? "" : "?")}
-          </div>
+          {profile?.avatar ? (
+            <div className="relative w-20 h-20 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10">
+              <img
+                src={profile?.avatar}
+                alt="profile"
+                className="w-full h-full z-10"
+              />
+            </div>
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10">
+              {profile?.username?.charAt(0).toUpperCase() ||
+                (loading ? "" : "?")}
+            </div>
+          )}
 
           <div className="mt-2">
             {loading && (
@@ -64,7 +75,7 @@ export function ProfileModal({ userId, onClose }: ProfileModalProps) {
             {profile && (
               <>
                 <h3 className="text-xl font-semibold text-[#f2f3f5]">
-                  {profile.avatar}
+                  {profile.username}
                 </h3>
                 {profile.status && (
                   <p className="text-sm text-[#949ba4] mt-0.5">
