@@ -1,7 +1,7 @@
 import { fetchProfile } from '../services/api'
 
 const cache = new Map<string, string>()
-const pending = new Set<string>()
+const pending = new Map<string, Promise<string | null>>()
 const listeners = new Set<() => void>()
 
 export function getUsername(userId: string): string | undefined {
@@ -14,25 +14,13 @@ export function setUsername(userId: string, username: string): void {
 }
 
 export function ensureUsername(userId: string): Promise<string | null> {
-  if (cache.has(userId)) {
-    return Promise.resolve(cache.get(userId)!)
-  }
-  if (pending.has(userId)) {
-    return new Promise((resolve) => {
-      const check = () => {
-        if (cache.has(userId)) {
-          resolve(cache.get(userId)!)
-        } else if (!pending.has(userId)) {
-          resolve(null)
-        } else {
-          setTimeout(check, 50)
-        }
-      }
-      check()
-    })
-  }
-  pending.add(userId)
-  return fetchProfile(userId)
+  const cached = cache.get(userId)
+  if (cached) return Promise.resolve(cached)
+
+  const existing = pending.get(userId)
+  if (existing) return existing
+
+  const promise = fetchProfile(userId)
     .then((p) => {
       cache.set(userId, p.username)
       notify()
@@ -43,6 +31,9 @@ export function ensureUsername(userId: string): Promise<string | null> {
       pending.delete(userId)
       return null
     })
+
+  pending.set(userId, promise)
+  return promise
 }
 
 export function subscribe(fn: () => void): () => void {

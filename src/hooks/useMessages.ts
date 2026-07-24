@@ -82,6 +82,9 @@ export function useMessages() {
       const onlineMatch = data.text.match(/^(.+) is now online$/)
       const offlineMatch = data.text.match(/^(.+) has disconnected$/)
       const id = onlineMatch?.[1] || offlineMatch?.[1]
+
+      if (id && id === user._id) return
+
       const msgId = `sys-${data.timestamp}-${Math.random()}`
 
       if (id) {
