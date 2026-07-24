@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useRef, type ReactNode 
 import { io, type Socket } from 'socket.io-client'
 import { useAuth } from './AuthContext'
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000'
+const SOCKET_URL = 'https://chatweb-backend-production-5541.up.railway.app'
 
 interface SocketContextValue {
   socket: Socket | null
