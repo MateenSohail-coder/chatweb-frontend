@@ -4,7 +4,7 @@ import { getMessages, saveMessages } from '../utils/chatStorage'
 import { useSocket } from '../context/SocketContext'
 import { useAuth } from '../context/AuthContext'
 import { usePresence } from './usePresence'
-import { getUsername, ensureUsername } from '../utils/userCache'
+import { getUsername, ensureUsername, subscribe } from '../utils/userCache'
 
 const STORAGE_KEY = 'general'
 
@@ -57,32 +57,48 @@ export function useMessages() {
       )
     }
 
-    const handleSystem = (data: { text: string; timestamp: number }) => {
-      const onlineMatch = data.text.match(/^(.+) is now online$/)
-      const offlineMatch = data.text.match(/^(.+) has disconnected$/)
-      const id = onlineMatch?.[1] || offlineMatch?.[1]
-      if (id) {
-        ensureUsername(id)
-      }
-      const name = id ? getUsername(id) || id.slice(0, 8) : null
-      const displayText = name
-        ? data.text.replace(id!, name)
-        : data.text
-
-      const msg: Message = {
-        id: `sys-${data.timestamp}-${Math.random()}`,
-        senderId: 'system',
-        senderName: 'System',
-        text: displayText,
-        replyToId: null,
-        timestamp: data.timestamp,
-        isSystem: true,
-      }
+    const addOrUpdateMsg = (id: string, text: string, timestamp: number) => {
       setMessages((prev) => {
+        const existing = prev.find((m) => m.id === id)
+        if (existing) {
+          return prev.map((m) => (m.id === id ? { ...m, text } : m))
+        }
+        const msg: Message = {
+          id,
+          senderId: 'system',
+          senderName: 'System',
+          text,
+          replyToId: null,
+          timestamp,
+          isSystem: true,
+        }
         const next = [...prev, msg]
         saveMessages(storageKeyRef.current, next)
         return next
       })
+    }
+
+    const handleSystem = (data: { text: string; timestamp: number }) => {
+      const onlineMatch = data.text.match(/^(.+) is now online$/)
+      const offlineMatch = data.text.match(/^(.+) has disconnected$/)
+      const id = onlineMatch?.[1] || offlineMatch?.[1]
+      const msgId = `sys-${data.timestamp}-${Math.random()}`
+
+      if (id) {
+        const cached = getUsername(id)
+        if (cached) {
+          addOrUpdateMsg(msgId, data.text.replace(id, cached), data.timestamp)
+        } else {
+          addOrUpdateMsg(msgId, data.text, data.timestamp)
+          ensureUsername(id).then((name) => {
+            if (name) {
+              addOrUpdateMsg(msgId, data.text.replace(id, name), data.timestamp)
+            }
+          })
+        }
+      } else {
+        addOrUpdateMsg(msgId, data.text, data.timestamp)
+      }
     }
 
     socket.on('receive_message', handleReceive)
@@ -95,6 +111,25 @@ export function useMessages() {
       socket.off('system_announcement', handleSystem)
     }
   }, [socket, user])
+
+  useEffect(() => {
+    if (!user) return
+    return subscribe(() => {
+      setMessages((prev) => {
+        let changed = false
+        const next = prev.map((m) => {
+          if (m.isSystem || m.senderId === user._id) return m
+          const resolved = getUsername(m.senderId)
+          if (resolved && m.senderName !== resolved) {
+            changed = true
+            return { ...m, senderName: resolved }
+          }
+          return m
+        })
+        return changed ? next : prev
+      })
+    })
+  }, [user])
 
   const sendMessage = useCallback((text: string, replyToId?: string | null) => {
     if (!socket || !user || !text.trim()) return

@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { usePresence } from "../hooks/usePresence";
-import { getUsername, setUsername, ensureUsername } from "../utils/userCache";
+import { getUsername, setUsername, ensureUsername, subscribe } from "../utils/userCache";
 
 export function Sidebar() {
   const { user, logout } = useAuth();
   const { onlineUserIds } = usePresence();
+  const [, forceUpdate] = useState(0);
   const onlineList = Array.from(onlineUserIds);
+
+  useEffect(() => subscribe(() => forceUpdate((n) => n + 1)), []);
 
   useEffect(() => {
     if (user) {
