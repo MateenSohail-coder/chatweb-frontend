@@ -50,7 +50,7 @@ export function ProfileModal({ userId, onClose }: ProfileModalProps) {
 
         <div className="relative px-4 pb-4">
           <div className="w-20 h-20 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10">
-            {profile?.username?.charAt(0).toUpperCase() || (loading ? '' : '?')}
+            {profile?.username?.charAt(0).toUpperCase() || (loading ? "" : "?")}
           </div>
 
           <div className="mt-2">
@@ -63,28 +63,41 @@ export function ProfileModal({ userId, onClose }: ProfileModalProps) {
             {error && <p className="text-sm text-[#f23f43]">{error}</p>}
             {profile && (
               <>
-                <h3 className="text-xl font-semibold text-[#f2f3f5]">{profile.username}</h3>
+                <h3 className="text-xl font-semibold text-[#f2f3f5]">
+                  {profile.avatar}
+                </h3>
                 {profile.status && (
-                  <p className="text-sm text-[#949ba4] mt-0.5">{profile.status}</p>
+                  <p className="text-sm text-[#949ba4] mt-0.5">
+                    {profile.status}
+                  </p>
                 )}
 
                 <div className="h-px bg-[#3f4147] my-3" />
 
                 <div>
-                  <span className="text-xs font-bold text-[#b5bac1] uppercase tracking-wider">Email</span>
-                  <p className="text-sm text-[#dbdee1] mt-0.5">{profile.email}</p>
+                  <span className="text-xs font-bold text-[#b5bac1] uppercase tracking-wider">
+                    Email
+                  </span>
+                  <p className="text-sm text-[#dbdee1] mt-0.5">
+                    {profile.email}
+                  </p>
                 </div>
 
                 <div className="mt-3">
-                  <span className="text-xs font-bold text-[#b5bac1] uppercase tracking-wider">Member Since</span>
+                  <span className="text-xs font-bold text-[#b5bac1] uppercase tracking-wider">
+                    Member Since
+                  </span>
                   <p className="text-sm text-[#dbdee1] mt-0.5">
                     {profile.createdAt
-                      ? new Date(profile.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        })
-                      : 'Unknown'}
+                      ? new Date(profile.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          },
+                        )
+                      : "Unknown"}
                   </p>
                 </div>
               </>
@@ -103,5 +116,5 @@ export function ProfileModal({ userId, onClose }: ProfileModalProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
