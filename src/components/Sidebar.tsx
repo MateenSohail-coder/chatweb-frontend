@@ -1,29 +1,35 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { usePresence } from "../hooks/usePresence";
-import { getUsername, setUsername, ensureUsername, subscribe } from "../utils/userCache";
+import { fetchProfile } from "../services/api";
 
 export function Sidebar() {
   const { user, logout } = useAuth();
   const { onlineUserIds } = usePresence();
-  const [, forceUpdate] = useState(0);
+  const [names, setNames] = useState<Record<string, string>>({});
   const onlineList = Array.from(onlineUserIds);
 
-  useEffect(() => subscribe(() => forceUpdate((n) => n + 1)), []);
-
   useEffect(() => {
-    if (user) {
-      setUsername(user._id, user.username);
-    }
+    if (!user) return;
+    setNames((prev) => ({ ...prev, [user._id]: user.username }));
   }, [user]);
 
   useEffect(() => {
-    for (const uid of onlineList) {
-      if (uid !== user?._id) {
-        ensureUsername(uid);
-      }
+    const missing = onlineList.filter(
+      (uid) => uid !== user?._id && !names[uid]
+    );
+    if (missing.length === 0) return;
+
+    let cancelled = false;
+    for (const uid of missing) {
+      fetchProfile(uid)
+        .then((p) => {
+          if (!cancelled) setNames((prev) => ({ ...prev, [uid]: p.username }));
+        })
+        .catch(() => {});
     }
-  }, [onlineList, user?._id]);
+    return () => { cancelled = true; };
+  }, [onlineList, user?._id, names]);
 
   return (
     <div className="w-60 flex flex-col h-full bg-[#2b2d31]">
@@ -67,7 +73,7 @@ export function Sidebar() {
           const isSelf = uid === user?._id;
           const displayName = isSelf
             ? `${user.username} (you)`
-            : getUsername(uid) || uid.slice(0, 8);
+            : names[uid] || uid.slice(0, 8);
 
           return (
             <div
