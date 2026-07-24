@@ -3,7 +3,7 @@ import { fetchProfile } from "../services/api";
 import type { UserProfile } from "../types";
 import { isVip } from "../utils/vip";
 import { motion } from "framer-motion";
-import { Crown, Mail, Calendar, X } from "lucide-react";
+import { Crown, Calendar, X } from "lucide-react";
 
 interface ProfileModalProps {
   userId: string;
