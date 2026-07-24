@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { SocketProvider } from './context/SocketContext'
-import { Sidebar } from './components/Sidebar'
 import { ChatWindow } from './components/ChatWindow'
 import { setUsername } from './utils/userCache'
 import { startCleanupScheduler } from './utils/chatStorage'
@@ -128,10 +127,7 @@ function ChatApp() {
 
   return (
     <div className="flex h-screen bg-[#313338]">
-      <Sidebar />
-      <div className="flex-1">
-        <ChatWindow />
-      </div>
+      <ChatWindow />
     </div>
   )
 }
