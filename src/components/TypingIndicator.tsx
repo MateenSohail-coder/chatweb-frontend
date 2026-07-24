@@ -19,7 +19,7 @@ export function TypingIndicator({ usernames }: TypingIndicatorProps) {
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 5 }}
-      className="flex items-center gap-2 px-4 py-1 text-xs text-[#949ba4] font-medium"
+      className="flex items-center gap-2 px-4 py-2 text-xs text-gray-400 font-medium"
     >
       <span className="flex gap-1 items-center">
         {[0, 150, 300].map((delay) => (
@@ -31,7 +31,7 @@ export function TypingIndicator({ usernames }: TypingIndicatorProps) {
               repeat: Infinity,
               delay: delay / 1000,
             }}
-            className="w-1.5 h-1.5 rounded-full bg-[#87898c]"
+            className="w-1.5 h-1.5 rounded-full bg-indigo-400"
           />
         ))}
       </span>

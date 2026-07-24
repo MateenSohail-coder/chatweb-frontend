@@ -2,9 +2,16 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { usePresence } from "../hooks/usePresence";
 import { fetchProfile } from "../services/api";
-import { isVip, VIP_COLOR, VIP_GLOW } from "../utils/vip";
+import { isVip } from "../utils/vip";
+import { motion, AnimatePresence } from "framer-motion";
+import { Crown, Hash, LogOut, X, Sparkles } from "lucide-react";
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const { user, logout } = useAuth();
   const { onlineUserIds } = usePresence();
   const [names, setNames] = useState<Record<string, string>>({});
@@ -17,7 +24,7 @@ export function Sidebar() {
 
   useEffect(() => {
     const missing = onlineList.filter(
-      (uid) => uid !== user?._id && !names[uid]
+      (uid) => uid !== user?._id && !names[uid],
     );
     if (missing.length === 0) return;
 
@@ -29,124 +36,161 @@ export function Sidebar() {
         })
         .catch(() => {});
     }
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [onlineList, user?._id, names]);
 
   return (
-    <div className="w-60 flex flex-col h-full bg-[#2b2d31]">
-      <div className="flex-shrink-0 h-12 flex items-center px-4 border-b border-[#3f4147] shadow-sm">
-        <h1 className="text-base font-semibold text-[#f2f3f5]">
-          Ephemeral Chat
-        </h1>
-      </div>
-
-      <div className="flex-1 overflow-y-auto py-3">
-        <div className="px-4 mb-1">
-          <span className="text-xs font-bold text-[#949ba4] uppercase tracking-wider">
-            Channels
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 px-4 py-2 mx-2 rounded-md bg-[rgba(79,84,92,0.24)] text-[#f2f3f5] cursor-default">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-[#949ba4]"
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          <span className="text-sm font-semibold">general</span>
-        </div>
-
-        <div className="mt-4 px-4 mb-1">
-          <span className="text-xs font-bold text-[#949ba4] uppercase tracking-wider">
-            Online — {onlineList.length}
-          </span>
-        </div>
-
-        {onlineList.map((uid) => {
-          const isSelf = uid === user?._id;
-          const vip = isVip(uid);
-          const displayName = isSelf
-            ? `${user.username} (you)`
-            : names[uid] || uid.slice(0, 8);
-
-          return (
-            <div
-              key={uid}
-              className="flex items-center gap-3 px-4 py-2 mx-2 rounded-md hover:bg-[rgba(79,84,92,0.16)] transition-colors group"
-            >
-              <div className="relative flex-shrink-0">
-                <div
-                  className="w-8 h-8 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-xs font-bold"
-                  style={vip ? { boxShadow: VIP_GLOW, border: '2px solid ' + VIP_COLOR } : {}}
-                >
-                  {displayName.charAt(0).toUpperCase()}
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#2b2d31] bg-[#23a55a]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span
-                  className="text-sm font-medium truncate block"
-                  style={vip ? { color: VIP_COLOR } : { color: '#dbdee1' }}
-                >
-                  {vip && !isSelf ? '★ ' : ''}{displayName}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-
-        {onlineList.length === 0 && (
-          <p className="px-6 py-4 text-xs text-[#949ba4] text-center">
-            Connecting...
-          </p>
+    <>
+      {/* Mobile Backdrop */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          />
         )}
-      </div>
+      </AnimatePresence>
 
-      <div className="flex-shrink-0 px-2 py-1.5 bg-[#1e1f22]">
-        <div className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:bg-[rgba(79,84,92,0.16)] transition-colors group">
-          <div className="relative flex-shrink-0">
-            <div className="w-8 h-8 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-xs font-bold">
-              {user?.username?.charAt(0).toUpperCase() || "?"}
+      <div
+        className={`fixed md:relative z-50 flex flex-col h-full w-[280px] bg-[#111214]/95 backdrop-blur-md border-r border-white/5 transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
+        {/* Header */}
+        <div className="flex-shrink-0 h-16 flex items-center justify-between px-5 border-b border-white/5 bg-black/20">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-lg shadow-indigo-500/20">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#1e1f22] bg-[#23a55a]" />
+            <h1 className="text-base font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+              Ephemeral Chat
+            </h1>
           </div>
-          <div className="flex-1 min-w-0">
-            <span className="text-sm font-medium text-[#dbdee1] truncate block">
-              {user?.username}
-            </span>
-            <span className="text-xs text-[#949ba4]">Online</span>
-          </div>
-          <button
-            type="button"
-            onClick={logout}
-            className="opacity-0 group-hover:opacity-100 p-1 text-[#949ba4] hover:text-[#f23f43] transition-all"
-            title="Logout"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="md:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10"
             >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          </button>
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin">
+          <div>
+            <span className="px-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+              Channels
+            </span>
+            <div className="mt-2 flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-300 font-medium text-sm">
+              <Hash className="w-4 h-4 text-indigo-400" />
+              <span>general</span>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between px-3 mb-2">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                Online Members
+              </span>
+              <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
+                {onlineList.length}
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              {onlineList.map((uid) => {
+                const isSelf = uid === user?._id;
+                const vip = isVip(uid);
+                const displayName = isSelf
+                  ? `${user.username} (you)`
+                  : names[uid] || uid.slice(0, 8);
+
+                return (
+                  <motion.div
+                    key={uid}
+                    whileHover={{ x: 4 }}
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5 transition-all group"
+                  >
+                    {/* Avatar Container with VIP Frame */}
+                    <div className="relative flex-shrink-0">
+                      <div
+                        className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all ${
+                          vip
+                            ? "ring-2 ring-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.5)]"
+                            : "bg-gradient-to-tr from-slate-700 to-slate-800"
+                        }`}
+                        style={
+                          vip
+                            ? {
+                                background:
+                                  "linear-gradient(135deg, #f59e0b, #d97706)",
+                              }
+                            : {}
+                        }
+                      >
+                        {displayName.charAt(0).toUpperCase()}
+                      </div>
+                      {vip && (
+                        <div className="absolute -top-1.5 -right-1.5 p-0.5 bg-black rounded-full border border-amber-400/50">
+                          <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#111214] bg-emerald-500" />
+                    </div>
+
+                    {/* Name */}
+                    <div className="flex-1 min-w-0 flex items-center gap-1.5">
+                      <span
+                        className={`text-sm truncate block font-medium ${
+                          vip
+                            ? "admin-font text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]"
+                            : "user-font text-gray-300"
+                        }`}
+                      >
+                        {displayName}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex-shrink-0 p-3 bg-black/40 border-t border-white/5">
+          <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-all">
+            <div className="relative flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                {user?.username?.charAt(0).toUpperCase() || "?"}
+              </div>
+              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-black bg-emerald-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-sm font-semibold text-white truncate block">
+                {user?.username}
+              </span>
+              <span className="text-[11px] text-emerald-400 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />{" "}
+                Active Now
+              </span>
+            </div>
+            <button
+              onClick={logout}
+              className="p-2 text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, type KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Message } from "../types";
+import { Send, X, CornerDownRight } from "lucide-react";
 
 interface ChatInputProps {
   onSend: (text: string, replyToId?: string | null) => void;
@@ -58,7 +59,7 @@ export function ChatInput({
   );
 
   return (
-    <div className="flex-shrink-0 px-4 pb-4 pt-0 bg-[#313338]">
+    <div className="flex-shrink-0 p-3 sm:p-4 bg-[#0d0e10]/80 backdrop-blur-xl border-t border-white/5">
       {/* Animated Reply Bar */}
       <AnimatePresence>
         {replyTo && (
@@ -66,51 +67,37 @@ export function ChatInput({
             initial={{ opacity: 0, height: 0, y: 10 }}
             animate={{ opacity: 1, height: "auto", y: 0 }}
             exit={{ opacity: 0, height: 0, y: 10 }}
-            transition={{ type: "spring", stiffness: 500, damping: 35 }}
-            className="overflow-hidden"
+            className="overflow-hidden mb-2"
           >
-            <div className="flex items-center gap-2 px-3 py-2 bg-[#2b2d31] border-l-4 border-[#5865F2] rounded-t-lg text-xs">
-              <div className="flex-1 min-w-0">
-                <span className="font-semibold text-[#5865F2]">
-                  Replying to @{replyTo.senderName || "user"}
+            <div className="flex items-center justify-between gap-2 px-3 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <CornerDownRight className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+                <span className="font-semibold text-indigo-300">
+                  Replying to @{replyTo.senderName || "user"}:
                 </span>
-                <p className="text-[#949ba4] truncate mt-0.5">{replyTo.text}</p>
+                <p className="text-gray-400 truncate">{replyTo.text}</p>
               </div>
               <button
                 type="button"
                 onClick={onCancelReply}
-                className="p-1 text-[#949ba4] hover:text-[#dbdee1] transition-colors rounded-full hover:bg-[#35373c]"
+                className="p-1 text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
               >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Text Area Container */}
-      <div
-        className={`flex items-end gap-2 bg-[#383a40] px-4 py-2.5 ${replyTo ? "rounded-b-lg" : "rounded-lg"} transition-all`}
-      >
+      {/* Text Area */}
+      <div className="flex items-end gap-2 bg-white/5 border border-white/10 rounded-2xl p-2 focus-within:border-indigo-500/50 transition-colors">
         <textarea
           value={text}
           onChange={(e) => handleChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={`Message ${replyTo ? `reply to @${replyTo.senderName}` : "#general"}`}
           rows={1}
-          className="flex-1 bg-transparent text-[#dbdee1] text-sm leading-5 resize-none outline-none placeholder-[#87898c] max-h-[144px]"
+          className="flex-1 bg-transparent px-2 text-gray-100 text-sm leading-6 resize-none outline-none placeholder:text-gray-500 max-h-32 scrollbar-none"
         />
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -118,21 +105,9 @@ export function ChatInput({
           type="button"
           onClick={handleSend}
           disabled={!text.trim()}
-          className="p-1.5 text-[#5865F2] disabled:text-[#4e5058] disabled:opacity-50 transition-colors rounded-md hover:bg-[#404249]"
+          className="p-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-white/5 disabled:text-gray-600 text-white rounded-xl shadow-lg shadow-indigo-600/20 disabled:shadow-none transition-all flex-shrink-0"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="22" y1="2" x2="11" y2="13" />
-            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-          </svg>
+          <Send className="w-4 h-4" />
         </motion.button>
       </div>
     </div>

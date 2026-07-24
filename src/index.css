@@ -1,61 +1,74 @@
+@import "https://fonts.cdnfonts.com/css/dynapuff";
+@import "https://fonts.cdnfonts.com/css/varuna";
 @import "tailwindcss";
-
 @theme {
-  --font-sans: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-mono: 'Consolas', 'Monaco', 'Andale Mono', monospace;
+    --font-sans: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-mono: 'Consolas', 'Monaco', 'Andale Mono', monospace;
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
-html, body, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
+html,
+body,
+#root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
 }
 
 body {
-  font-family: var(--font-sans);
-  background: #313338;
-  color: #dbdee1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-sans);
+    background: #313338;
+    color: #dbdee1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 textarea {
-  font-family: inherit;
+    font-family: inherit;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+    width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e1f22;
-  border-radius: 4px;
+    background: #1e1f22;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2b2d31;
+    background: #2b2d31;
 }
 
 @keyframes bounce {
-  0%, 60%, 100% {
-    transform: translateY(0);
-  }
-  30% {
-    transform: translateY(-4px);
-  }
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-4px);
+    }
 }
 
 .animate-bounce {
-  animation: bounce 1.4s infinite ease-in-out;
+    animation: bounce 1.4s infinite ease-in-out;
+}
+
+.admin-font {
+    font-family: 'DynaPuff', sans-serif;
+}
+
+.user-font {
+    font-family: 'VARUNA', sans-serif;
 }

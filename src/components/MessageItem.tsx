@@ -3,26 +3,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Message } from "../types";
 import { useAuth } from "../context/AuthContext";
 import { ReactionPicker } from "./ReactionPicker";
-import { isVip, VIP_COLOR, VIP_GLOW } from "../utils/vip";
+import { isVip } from "../utils/vip";
+import { Crown, Reply, Smile } from "lucide-react";
 
 interface MessageItemProps {
   message: Message;
   onReply: (message: Message) => void;
   onReaction: (messageId: string, emoji: string) => void;
   onAvatarClick: (userId: string) => void;
-}
-
-function hashColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const colors = [
-    "#5865F2", "#23a55a", "#f26522", "#e05a5a",
-    "#9b59b6", "#1abc9c", "#e67e22", "#3498db",
-    "#e84393", "#00b894", "#6c5ce7", "#fdcb6e",
-  ];
-  return colors[Math.abs(hash) % colors.length];
 }
 
 export function MessageItem({
@@ -40,14 +28,13 @@ export function MessageItem({
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="flex items-center justify-center py-2 px-4"
+        className="flex items-center justify-center my-3 px-4"
       >
-        <div className="h-px bg-[#3f4147] flex-1" />
-        <span className="px-3 text-xs text-[#949ba4] font-medium whitespace-nowrap select-none">
+        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent flex-1" />
+        <span className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[11px] text-gray-400 font-medium">
           {message.text}
         </span>
-        <div className="h-px bg-[#3f4147] flex-1" />
+        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent flex-1" />
       </motion.div>
     );
   }
@@ -61,164 +48,144 @@ export function MessageItem({
     user && message.reactions?.[emoji]?.includes(user._id);
   const displayName = message.senderName || message.senderId.slice(0, 8);
   const isOwn = user?._id === message.senderId;
-  const avatarColor = hashColor(message.senderId);
   const vip = isVip(message.senderId);
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className={`group relative flex gap-3 px-4 py-1 transition-colors duration-150 rounded-md mx-2 my-0.5 ${
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 450, damping: 28 }}
+      className={`group relative flex gap-3 px-2 sm:px-4 py-1.5 rounded-2xl transition-all duration-200 ${
         isOwn ? "flex-row-reverse" : ""
-      } ${isOwn ? "" : "hover:bg-[rgba(79,84,92,0.16)]"}`}
+      }`}
     >
-      {/* Avatar */}
+      {/* Avatar Container with VIP Decoration */}
       <button
         type="button"
         onClick={() => onAvatarClick(message.senderId)}
-        className={`flex-shrink-0 mt-0.5 focus:outline-none ${isOwn ? "ml-2" : ""}`}
+        className="relative flex-shrink-0 self-end mb-1 focus:outline-none"
       >
         <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm hover:scale-105 transition-transform"
-          style={{
-            backgroundColor: avatarColor,
-            ...(vip ? { boxShadow: VIP_GLOW, border: '2px solid ' + VIP_COLOR } : {}),
-          }}
+          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-bold shadow-md transition-transform hover:scale-105 ${
+            vip
+              ? "ring-2 ring-amber-400/80 shadow-[0_0_15px_rgba(251,191,36,0.4)] bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400"
+              : "bg-gradient-to-tr from-indigo-600 to-purple-600"
+          }`}
         >
           {displayName.charAt(0).toUpperCase()}
         </div>
+        {vip && (
+          <div className="absolute -top-1.5 -right-1.5 p-0.5 bg-black rounded-full border border-amber-400/60 shadow-lg">
+            <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+          </div>
+        )}
       </button>
 
-      {/* Message Body */}
+      {/* Bubble & Metadata */}
       <div
-        className={`min-w-0 pt-0.5 ${
-          isOwn
-            ? "bg-[#2b2d31] rounded-xl px-3 py-2 max-w-[75%]"
-            : "flex-1"
-        }`}
+        className={`min-w-0 max-w-[85%] sm:max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}
       >
-        <div className={`flex items-baseline gap-2 ${isOwn ? "flex-row-reverse" : ""}`}>
+        <div
+          className={`flex items-center gap-2 mb-1 px-1 ${isOwn ? "flex-row-reverse" : ""}`}
+        >
           <button
             type="button"
             onClick={() => onAvatarClick(message.senderId)}
-            className={`text-sm font-semibold hover:underline focus:outline-none`}
-            style={{
-              color: isOwn ? '#23a55a' : vip ? VIP_COLOR : '#f2f3f5',
-            }}
-          >
-            {vip && !isOwn ? '★ ' : ''}{isOwn ? "You" : displayName}
-          </button>
-          <span
-            className={`text-[11px] text-[#949ba4] transition-opacity ${
-              isOwn ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            className={`text-xs font-bold hover:underline flex items-center gap-1 ${
+              vip
+                ? "admin-font text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.4)]"
+                : "user-font text-gray-300"
             }`}
           >
-            {time}
-          </span>
+            {displayName}
+            {vip && (
+              <Crown className="w-3 h-3 text-amber-400 fill-amber-400 inline" />
+            )}
+          </button>
+          <span className="text-[10px] text-gray-500">{time}</span>
         </div>
 
-        {/* Reply Quote Banner */}
-        {message.replyTo && (
-          <div
-            className={`flex items-center gap-2 mt-1 px-2 py-1 rounded-r-md text-xs ${
-              isOwn
-                ? "bg-[#1e1f22] border-r-2 border-[#23a55a]"
-                : "bg-[#2b2d31]/60 border-l-2 border-[#5865F2]"
-            }`}
-          >
-            <span
-              className={`font-semibold truncate ${
-                isOwn ? "text-[#23a55a]" : "text-[#5865F2]"
+        <div
+          className={`relative p-3 sm:p-3.5 rounded-2xl shadow-lg border backdrop-blur-md ${
+            isOwn
+              ? "bg-gradient-to-r from-indigo-600 to-indigo-700 border-indigo-500/30 text-white rounded-br-none"
+              : vip
+                ? "bg-amber-950/20 border-amber-500/30 text-amber-50 rounded-bl-none shadow-[0_0_15px_rgba(251,191,36,0.05)]"
+                : "bg-white/5 border-white/10 text-gray-100 rounded-bl-none"
+          }`}
+        >
+          {/* Reply Banner */}
+          {message.replyTo && (
+            <div
+              className={`flex items-center gap-2 mb-2 p-2 rounded-lg text-xs border ${
+                isOwn
+                  ? "bg-black/20 border-white/10 text-indigo-100"
+                  : "bg-black/40 border-white/5 text-gray-300"
               }`}
             >
-              @{message.replyTo.senderName}
-            </span>
-            <span className="text-[#b5bac1] truncate">
-              {message.replyTo.text}
-            </span>
-          </div>
-        )}
+              <Reply className="w-3 h-3 text-indigo-400" />
+              <span className="font-semibold text-indigo-300">
+                @{message.replyTo.senderName}:
+              </span>
+              <span className="truncate opacity-80">
+                {message.replyTo.text}
+              </span>
+            </div>
+          )}
 
-        {/* Text */}
-        <p className="text-[15px] leading-[1.375] text-[#dbdee1] mt-0.5 break-words selection:bg-[#5865F2] selection:text-white">
-          {message.text}
-        </p>
+          <p className="text-xs sm:text-sm leading-relaxed break-words whitespace-pre-wrap">
+            {message.text}
+          </p>
 
-        {/* Reactions List */}
-        {reactionKeys.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1.5">
-            {reactionKeys.map((emoji) => (
-              <motion.button
-                key={emoji}
-                whileTap={{ scale: 0.9 }}
-                type="button"
-                onClick={() => onReaction(message.id, emoji)}
-                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-medium border transition-colors ${
-                  hasReacted(emoji)
-                    ? "bg-[#5865F2]/20 border-[#5865F2] text-[#f2f3f5]"
-                    : "bg-[#2b2d31] border-transparent text-[#b5bac1] hover:border-[#3f4147] hover:text-[#dbdee1]"
-                }`}
-              >
-                <span>{emoji}</span>
-                <span>{message.reactions![emoji].length}</span>
-              </motion.button>
-            ))}
-          </div>
-        )}
+          {/* Reactions */}
+          {reactionKeys.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2 pt-1">
+              {reactionKeys.map((emoji) => (
+                <motion.button
+                  key={emoji}
+                  whileTap={{ scale: 0.9 }}
+                  type="button"
+                  onClick={() => onReaction(message.id, emoji)}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border transition-all ${
+                    hasReacted(emoji)
+                      ? "bg-indigo-500/20 border-indigo-400 text-indigo-200"
+                      : "bg-black/30 border-white/10 text-gray-400 hover:border-white/20"
+                  }`}
+                >
+                  <span>{emoji}</span>
+                  <span>{message.reactions![emoji].length}</span>
+                </motion.button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Floating Action Menu */}
+      {/* Floating Actions */}
       <div
         ref={actionMenuRef}
-        className={`absolute -top-3 hidden group-hover:flex items-center bg-[#313338] border border-[#3f4147] rounded-md shadow-lg z-20 overflow-visible ${
+        className={`absolute -top-3 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center bg-[#18191c] border border-white/10 rounded-xl shadow-xl z-20 overflow-hidden ${
           isOwn ? "left-4" : "right-4"
         }`}
       >
         <button
           type="button"
           onClick={() => onReply(message)}
-          className="p-1.5 text-[#b5bac1] hover:text-[#f2f3f5] hover:bg-[#35373c] rounded-l-md transition-colors"
+          className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
           title="Reply"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="9 17 4 12 9 7" />
-            <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
-          </svg>
+          <Reply className="w-3.5 h-3.5" />
         </button>
 
         <div className="relative">
           <button
             type="button"
             onClick={() => setShowPicker((prev) => !prev)}
-            className="p-1.5 text-[#b5bac1] hover:text-[#f2f3f5] hover:bg-[#35373c] rounded-r-md transition-colors"
+            className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
             title="Add Reaction"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-              <line x1="9" y1="9" x2="9.01" y2="9" />
-              <line x1="15" y1="9" x2="15.01" y2="9" />
-            </svg>
+            <Smile className="w-3.5 h-3.5" />
           </button>
 
           <AnimatePresence>
