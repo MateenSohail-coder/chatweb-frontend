@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { fetchProfile } from '../services/api'
 import type { UserProfile } from '../types'
+import { isVip, VIP_COLOR, VIP_GLOW } from '../utils/vip'
 
 interface ProfileModalProps {
   userId: string
@@ -49,20 +50,36 @@ export function ProfileModal({ userId, onClose }: ProfileModalProps) {
         <div className="h-15 bg-[#5865F2]" />
 
         <div className="relative px-4 pb-4">
-          {profile?.avatar ? (
-            <div className="relative w-20 h-20 overflow-hidden rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10">
-              <img
-                src={profile?.avatar}
-                alt="profile"
-                className="w-full h-full z-10"
-              />
-            </div>
-          ) : (
-            <div className="w-20 h-20 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10">
-              {profile?.username?.charAt(0).toUpperCase() ||
-                (loading ? "" : "?")}
-            </div>
-          )}
+          {(() => {
+            const vip = profile ? isVip(profile._id) : false;
+            const vipStyle = vip
+              ? { boxShadow: VIP_GLOW, borderColor: VIP_COLOR, borderWidth: '3px' }
+              : {};
+            return (
+              <>
+                {profile?.avatar ? (
+                  <div
+                    className="relative w-20 h-20 overflow-hidden rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10"
+                    style={vipStyle}
+                  >
+                    <img
+                      src={profile?.avatar}
+                      alt="profile"
+                      className="w-full h-full z-10"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="w-20 h-20 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#232428] -mt-10"
+                    style={vipStyle}
+                  >
+                    {profile?.username?.charAt(0).toUpperCase() ||
+                      (loading ? "" : "?")}
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
           <div className="mt-2">
             {loading && (
@@ -74,8 +91,11 @@ export function ProfileModal({ userId, onClose }: ProfileModalProps) {
             {error && <p className="text-sm text-[#f23f43]">{error}</p>}
             {profile && (
               <>
-                <h3 className="text-xl font-semibold text-[#f2f3f5]">
-                  {profile.username}
+                <h3
+                  className="text-xl font-semibold"
+                  style={{ color: isVip(profile._id) ? VIP_COLOR : '#f2f3f5' }}
+                >
+                  {isVip(profile._id) ? '★ ' : ''}{profile.username}
                 </h3>
                 {profile.status && (
                   <p className="text-sm text-[#949ba4] mt-0.5">

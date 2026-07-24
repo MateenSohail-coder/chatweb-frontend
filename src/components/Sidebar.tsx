@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { usePresence } from "../hooks/usePresence";
 import { fetchProfile } from "../services/api";
+import { isVip, VIP_COLOR, VIP_GLOW } from "../utils/vip";
 
 export function Sidebar() {
   const { user, logout } = useAuth();
@@ -71,6 +72,7 @@ export function Sidebar() {
 
         {onlineList.map((uid) => {
           const isSelf = uid === user?._id;
+          const vip = isVip(uid);
           const displayName = isSelf
             ? `${user.username} (you)`
             : names[uid] || uid.slice(0, 8);
@@ -81,14 +83,20 @@ export function Sidebar() {
               className="flex items-center gap-3 px-4 py-2 mx-2 rounded-md hover:bg-[rgba(79,84,92,0.16)] transition-colors group"
             >
               <div className="relative flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-xs font-bold">
+                <div
+                  className="w-8 h-8 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-xs font-bold"
+                  style={vip ? { boxShadow: VIP_GLOW, border: '2px solid ' + VIP_COLOR } : {}}
+                >
                   {displayName.charAt(0).toUpperCase()}
                 </div>
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#2b2d31] bg-[#23a55a]" />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-sm font-medium text-[#dbdee1] truncate block">
-                  {displayName}
+                <span
+                  className="text-sm font-medium truncate block"
+                  style={vip ? { color: VIP_COLOR } : { color: '#dbdee1' }}
+                >
+                  {vip && !isSelf ? '★ ' : ''}{displayName}
                 </span>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Message } from "../types";
 import { useAuth } from "../context/AuthContext";
 import { ReactionPicker } from "./ReactionPicker";
+import { isVip, VIP_COLOR, VIP_GLOW } from "../utils/vip";
 
 interface MessageItemProps {
   message: Message;
@@ -61,6 +62,7 @@ export function MessageItem({
   const displayName = message.senderName || message.senderId.slice(0, 8);
   const isOwn = user?._id === message.senderId;
   const avatarColor = hashColor(message.senderId);
+  const vip = isVip(message.senderId);
 
   return (
     <motion.div
@@ -80,7 +82,10 @@ export function MessageItem({
       >
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm hover:scale-105 transition-transform"
-          style={{ backgroundColor: avatarColor }}
+          style={{
+            backgroundColor: avatarColor,
+            ...(vip ? { boxShadow: VIP_GLOW, border: '2px solid ' + VIP_COLOR } : {}),
+          }}
         >
           {displayName.charAt(0).toUpperCase()}
         </div>
@@ -98,11 +103,12 @@ export function MessageItem({
           <button
             type="button"
             onClick={() => onAvatarClick(message.senderId)}
-            className={`text-sm font-semibold hover:underline focus:outline-none ${
-              isOwn ? "text-[#23a55a]" : "text-[#f2f3f5]"
-            }`}
+            className={`text-sm font-semibold hover:underline focus:outline-none`}
+            style={{
+              color: isOwn ? '#23a55a' : vip ? VIP_COLOR : '#f2f3f5',
+            }}
           >
-            {isOwn ? "You" : displayName}
+            {vip && !isOwn ? '★ ' : ''}{isOwn ? "You" : displayName}
           </button>
           <span
             className={`text-[11px] text-[#949ba4] transition-opacity ${
